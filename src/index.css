@@ -1,0 +1,126 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+  
+  body {
+    @apply bg-gray-50 text-gray-900;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors;
+  }
+  
+  .btn-secondary {
+    @apply bg-gray-600 text-white px-4 py-2 rounded-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors;
+  }
+  
+  .input-field {
+    @apply w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent;
+  }
+  
+  .card {
+    @apply bg-white rounded-lg shadow-lg p-6;
+  }
+}
+
+/* Print styles */
+@media print {
+  .print\:hidden {
+    display: none !important;
+  }
+  
+  .print\:shadow-none {
+    box-shadow: none !important;
+  }
+  
+  body {
+    background: white !important;
+  }
+  
+  .bg-gray-50 {
+    background: white !important;
+  }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+
+/* Loading animation */
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+/* Responsive table */
+@media (max-width: 768px) {
+  .table-responsive {
+    font-size: 0.875rem;
+  }
+  
+  .table-responsive th,
+  .table-responsive td {
+    padding: 0.5rem 0.25rem;
+  }
+}
+
+/* Chart responsiveness */
+.recharts-responsive-container {
+  min-height: 300px;
+}
+
+/* Form validation styles */
+.error-message {
+  @apply text-red-600 text-sm flex items-center gap-1 mt-1;
+}
+
+.success-message {
+  @apply text-green-600 text-sm flex items-center gap-1 mt-1;
+}
+
+/* Invoice print styles */
+@page {
+  margin: 1in;
+}
+
+@media print {
+  .invoice-container {
+    page-break-inside: avoid;
+  }
+  
+  .invoice-table {
+    page-break-inside: auto;
+  }
+  
+  .invoice-table tr {
+    page-break-inside: avoid;
+    page-break-after: auto;
+  }
+}

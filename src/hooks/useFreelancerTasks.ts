@@ -68,8 +68,8 @@ export const useFreelancerTasks = () => {
     }
   };
 
-  const getUniqueValues = (field: keyof FreelancerTask) => {
-    return Array.from(new Set(tasks.map(task => task[field]))).filter(Boolean);
+  const getUniqueValues = (field: keyof FreelancerTask): string[] => {
+    return Array.from(new Set(tasks.map(task => String(task[field])))).filter(Boolean);
   };
 
   useEffect(() => {

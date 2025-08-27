@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { TaskForm } from './components/TaskForm';
 import { FilterPanel } from './components/FilterPanel';
 import { TaskTable } from './components/TaskTable';
@@ -7,7 +7,7 @@ import { InvoiceGenerator } from './components/InvoiceGenerator';
 import { useFreelancerTasks } from './hooks/useFreelancerTasks';
 import { FilterState, ChartData } from './types';
 import { exportToCSV } from './utils/csvExport';
-import { Users, BarChart3, FileText, Database } from 'lucide-react';
+import { BarChart3, FileText, Database } from 'lucide-react';
 
 const initialFilters: FilterState = {
   dateRange: { start: '', end: '' },

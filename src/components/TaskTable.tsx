@@ -1,20 +1,25 @@
 import React, { useState } from 'react';
-import { FreelancerTask } from '../lib/supabase';
-import { ChevronUp, ChevronDown, Download } from 'lucide-react';
+import { FreelancerTask, FreelancerTaskInsert } from '../lib/supabase';
+import { ChevronUp, ChevronDown, Download, Pencil, X } from 'lucide-react';
 import { format } from 'date-fns';
+import { EditTaskModal } from './EditTaskModal';
 
 interface TaskTableProps {
   tasks: FreelancerTask[];
-  onExportCSV: () => void;
+  onExportExcel: () => void;
+  onUpdateTask?: (id: string, updates: Partial<FreelancerTaskInsert>) => Promise<any>;
+  onDeleteTask?: (id: string) => Promise<any>;
 }
 
 type SortField = keyof FreelancerTask | 'total_payment';
 type SortDirection = 'asc' | 'desc';
 
-export const TaskTable: React.FC<TaskTableProps> = ({ tasks, onExportCSV }) => {
+export const TaskTable: React.FC<TaskTableProps> = ({ tasks, onExportExcel, onUpdateTask, onDeleteTask }) => {
   const [sortField, setSortField] = useState<SortField>('created_at');
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
   const [currentPage, setCurrentPage] = useState(1);
+  const [editingTask, setEditingTask] = useState<FreelancerTask | null>(null);
+  const [showEditModal, setShowEditModal] = useState(false);
   const itemsPerPage = 10;
 
   const handleSort = (field: SortField) => {
@@ -64,7 +69,34 @@ export const TaskTable: React.FC<TaskTableProps> = ({ tasks, onExportCSV }) => {
   };
 
   const formatDate = (dateString: string) => {
-    return format(new Date(dateString), 'dd/MM/yyyy');
+    return format(new Date(dateString), 'dd/MM/yy');
+  };
+
+  const handleDelete = async (taskId: string) => {
+    if (!onDeleteTask) return;
+    
+    if (window.confirm('Are you sure you want to delete this task?')) {
+      const result = await onDeleteTask(taskId);
+      if (!result.success) {
+        alert('Failed to delete task');
+      }
+    }
+  };
+
+  const handleEdit = (task: FreelancerTask) => {
+    setEditingTask(task);
+    setShowEditModal(true);
+  };
+
+  const handleUpdateTask = async (id: string, updates: Partial<FreelancerTaskInsert>) => {
+    if (!onUpdateTask) return { success: false, error: 'Update function not provided' };
+    
+    const result = await onUpdateTask(id, updates);
+    if (result.success) {
+      setShowEditModal(false);
+      setEditingTask(null);
+    }
+    return result;
   };
 
   return (
@@ -74,11 +106,11 @@ export const TaskTable: React.FC<TaskTableProps> = ({ tasks, onExportCSV }) => {
           Tasks ({tasks.length} total)
         </h3>
         <button
-          onClick={onExportCSV}
-          className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors"
+          onClick={onExportExcel}
+          className="flex items-center gap-2 px-4 py-2 bg-orange-600 text-white rounded-md hover:bg-orange-700 transition-colors"
         >
           <Download className="w-4 h-4" />
-          Export CSV
+          Export Excel
         </button>
       </div>
 
@@ -87,34 +119,7 @@ export const TaskTable: React.FC<TaskTableProps> = ({ tasks, onExportCSV }) => {
           <thead className="bg-gray-50">
             <tr>
               <th 
-                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
-                onClick={() => handleSort('task')}
-              >
-                <div className="flex items-center gap-1">
-                  Task
-                  <SortIcon field="task" />
-                </div>
-              </th>
-              <th 
-                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
-                onClick={() => handleSort('model')}
-              >
-                <div className="flex items-center gap-1">
-                  Model
-                  <SortIcon field="model" />
-                </div>
-              </th>
-              <th 
-                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
-                onClick={() => handleSort('language')}
-              >
-                <div className="flex items-center gap-1">
-                  Language
-                  <SortIcon field="language" />
-                </div>
-              </th>
-              <th 
-                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                className="px-5 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
                 onClick={() => handleSort('freelancer_name')}
               >
                 <div className="flex items-center gap-1">
@@ -123,7 +128,34 @@ export const TaskTable: React.FC<TaskTableProps> = ({ tasks, onExportCSV }) => {
                 </div>
               </th>
               <th 
-                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                className="px-5 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                onClick={() => handleSort('task')}
+              >
+                <div className="flex items-center gap-1">
+                  Task
+                  <SortIcon field="task" />
+                </div>
+              </th>
+              <th 
+                className="px-5 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                onClick={() => handleSort('model')}
+              >
+                <div className="flex items-center gap-1">
+                  Model
+                  <SortIcon field="model" />
+                </div>
+              </th>
+              <th 
+                className="px-5 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                onClick={() => handleSort('language')}
+              >
+                <div className="flex items-center gap-1">
+                  Language
+                  <SortIcon field="language" />
+                </div>
+              </th>
+              <th 
+                className="px-5 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
                 onClick={() => handleSort('freelancer_type')}
               >
                 <div className="flex items-center gap-1">
@@ -132,7 +164,7 @@ export const TaskTable: React.FC<TaskTableProps> = ({ tasks, onExportCSV }) => {
                 </div>
               </th>
               <th 
-                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                className="px-5 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
                 onClick={() => handleSort('pay_rate_per_day')}
               >
                 <div className="flex items-center gap-1">
@@ -141,7 +173,7 @@ export const TaskTable: React.FC<TaskTableProps> = ({ tasks, onExportCSV }) => {
                 </div>
               </th>
               <th 
-                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                className="px-5 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
                 onClick={() => handleSort('total_time_taken')}
               >
                 <div className="flex items-center gap-1">
@@ -150,25 +182,16 @@ export const TaskTable: React.FC<TaskTableProps> = ({ tasks, onExportCSV }) => {
                 </div>
               </th>
               <th 
-                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                className="px-5 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
                 onClick={() => handleSort('start_date')}
               >
                 <div className="flex items-center gap-1">
-                  Start Date
+                  Period
                   <SortIcon field="start_date" />
                 </div>
               </th>
               <th 
-                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
-                onClick={() => handleSort('completion_date')}
-              >
-                <div className="flex items-center gap-1">
-                  End Date
-                  <SortIcon field="completion_date" />
-                </div>
-              </th>
-              <th 
-                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                className="px-5 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
                 onClick={() => handleSort('total_payment')}
               >
                 <div className="flex items-center gap-1">
@@ -176,46 +199,63 @@ export const TaskTable: React.FC<TaskTableProps> = ({ tasks, onExportCSV }) => {
                   <SortIcon field="total_payment" />
                 </div>
               </th>
+              <th className="px-5 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+              </th>
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
             {paginatedTasks.map((task) => (
               <tr key={task.id} className="hover:bg-gray-50">
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  {task.task}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  {task.model}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  {task.language}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                <td className="px-5 py-4 whitespace-nowrap text-sm text-gray-900">
                   {task.freelancer_name}
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap">
+                <td className="px-5 py-4 whitespace-nowrap text-sm text-gray-900">
+                  {task.task}
+                </td>
+                <td className="px-5 py-4 whitespace-nowrap text-sm text-gray-900">
+                  {task.model}
+                </td>
+                <td className="px-5 py-4 whitespace-nowrap text-sm text-gray-900">
+                  {task.language}
+                </td>
+                <td className="px-5 py-4 whitespace-nowrap">
                   <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
                     task.freelancer_type === 'Linguist' 
                       ? 'bg-blue-100 text-blue-800' 
-                      : 'bg-purple-100 text-purple-800'
+                      : 'bg-orange-100 text-orange-800'
                   }`}>
                     {task.freelancer_type}
                   </span>
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                <td className="px-5 py-4 whitespace-nowrap text-sm text-gray-900">
                   {formatCurrency(task.pay_rate_per_day)}
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                <td className="px-5 py-4 whitespace-nowrap text-sm text-gray-900">
                   {task.total_time_taken}
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  {formatDate(task.start_date)}
+                <td className="px-5 py-4 whitespace-nowrap text-sm text-gray-900">
+                  {formatDate(task.start_date)} - {formatDate(task.completion_date)}
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  {formatDate(task.completion_date)}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                <td className="px-5 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                   {formatCurrency(task.pay_rate_per_day * task.total_time_taken)}
+                </td>
+                <td className="px-5 py-4 whitespace-nowrap text-center">
+                  <div className="flex items-center justify-center gap-2">
+                    <button
+                      onClick={() => handleEdit(task)}
+                      className="p-1 rounded hover:bg-blue-100 text-blue-600 hover:text-blue-700 transition-colors"
+                      title="Edit"
+                    >
+                      <Pencil className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={() => handleDelete(task.id)}
+                      className="p-1 rounded hover:bg-red-100 text-red-600 hover:text-red-700 transition-colors"
+                      title="Delete"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
                 </td>
               </tr>
             ))}
@@ -250,6 +290,17 @@ export const TaskTable: React.FC<TaskTableProps> = ({ tasks, onExportCSV }) => {
           </div>
         </div>
       )}
+
+      {/* Edit Task Modal */}
+      <EditTaskModal
+        task={editingTask}
+        isOpen={showEditModal}
+        onClose={() => {
+          setShowEditModal(false);
+          setEditingTask(null);
+        }}
+        onUpdate={handleUpdateTask}
+      />
     </div>
   );
 };

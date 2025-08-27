@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
-import { X, UserPlus, AlertCircle } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { X, UserPlus } from 'lucide-react';
+import { FormField } from './FormField';
 
 interface AddFreelancerModalProps {
   isOpen: boolean;
@@ -15,6 +16,25 @@ export const AddFreelancerModal: React.FC<AddFreelancerModalProps> = ({
   const [name, setName] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  // Auto-focus input when modal opens
+  useEffect(() => {
+    if (isOpen && inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, [isOpen]);
+
+  // Handle ESC key
+  useEffect(() => {
+    const handleEsc = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && isOpen) {
+        handleClose();
+      }
+    };
+    document.addEventListener('keydown', handleEsc);
+    return () => document.removeEventListener('keydown', handleEsc);
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
@@ -50,61 +70,64 @@ export const AddFreelancerModal: React.FC<AddFreelancerModalProps> = ({
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto">
       <div className="flex min-h-screen items-center justify-center p-4">
-        {/* Backdrop */}
+        {/* Backdrop - no animation */}
         <div 
-          className="fixed inset-0 bg-black bg-opacity-50 transition-opacity"
+          className="fixed inset-0 bg-black bg-opacity-30"
           onClick={handleClose}
         />
         
         {/* Modal */}
-        <div className="relative bg-white rounded-lg shadow-xl max-w-md w-full p-6">
+        <div className="relative bg-white rounded-lg shadow-2xl max-w-md w-full p-5">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-              <UserPlus className="w-5 h-5" />
+            <h3 className="text-base font-semibold text-gray-900 flex items-center gap-2">
+              <UserPlus className="w-4 h-4" style={{color: '#F59222'}} />
               Add New Freelancer
             </h3>
             <button
               type="button"
               onClick={handleClose}
-              className="text-gray-400 hover:text-gray-500"
+              className="text-gray-400 hover:text-gray-600 p-1.5 rounded-md hover:bg-gray-100"
+              aria-label="Close"
             >
-              <X className="w-5 h-5" />
+              <X className="w-4 h-4" />
             </button>
           </div>
 
           <form onSubmit={handleSubmit}>
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Freelancer Name *
-              </label>
+            <FormField 
+              label="Freelancer Name" 
+              required 
+              error={error}
+              icon={<UserPlus className="w-3 h-3" />}
+            >
               <input
+                ref={inputRef}
                 type="text"
                 value={name}
-                onChange={(e) => setName(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                onChange={(e) => {
+                  setName(e.target.value);
+                  setError(''); // Clear error on type
+                }}
+                className="input-base"
                 placeholder="Enter freelancer name"
-                autoFocus
               />
-              {error && (
-                <p className="mt-1 text-sm text-red-600 flex items-center gap-1">
-                  <AlertCircle className="w-4 h-4" />
-                  {error}
-                </p>
-              )}
-            </div>
+            </FormField>
 
-            <div className="flex justify-end gap-3">
+            <div className="flex justify-end gap-2 mt-4">
               <button
                 type="button"
                 onClick={handleClose}
-                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                className="btn-base btn-secondary"
               >
                 Cancel
               </button>
               <button
                 type="submit"
-                disabled={loading}
-                className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled={loading || !name.trim()}
+                className={`
+                  btn-base btn-primary
+                  ${loading || !name.trim() ? 'opacity-50 cursor-not-allowed' : ''}
+                `}
               >
                 {loading ? 'Adding...' : 'Add Freelancer'}
               </button>

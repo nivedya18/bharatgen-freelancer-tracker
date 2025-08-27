@@ -15,9 +15,9 @@ export interface FilterState {
     start: string;
     end: string;
   };
-  freelancer_name: string;
-  language: string;
-  model: string;
+  freelancer_name: string | string[];
+  language: string | string[];
+  model: string | string[];
   freelancer_type: string;
   search: string;
 }

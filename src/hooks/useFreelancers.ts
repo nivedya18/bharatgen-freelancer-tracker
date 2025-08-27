@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { supabase, Freelancer, FreelancerInsert } from '../lib/supabase';
+import { supabase, Freelancer } from '../lib/supabase';
 
 export const useFreelancers = () => {
   const [freelancers, setFreelancers] = useState<Freelancer[]>([]);

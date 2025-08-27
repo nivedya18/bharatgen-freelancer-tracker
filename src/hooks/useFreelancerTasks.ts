@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase, FreelancerTask, FreelancerTaskInsert } from '../lib/supabase';
 import { FilterState } from '../types';
 
@@ -7,7 +7,7 @@ export const useFreelancerTasks = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchTasks = async (filters?: Partial<FilterState>) => {
+  const fetchTasks = useCallback(async (filters?: Partial<FilterState>) => {
     try {
       setLoading(true);
       let query = supabase
@@ -23,19 +23,31 @@ export const useFreelancerTasks = () => {
         query = query.lte('completion_date', filters.dateRange.end);
       }
       if (filters?.freelancer_name) {
-        query = query.eq('freelancer_name', filters.freelancer_name);
+        if (Array.isArray(filters.freelancer_name) && filters.freelancer_name.length > 0) {
+          query = query.in('freelancer_name', filters.freelancer_name);
+        } else if (typeof filters.freelancer_name === 'string' && filters.freelancer_name) {
+          query = query.eq('freelancer_name', filters.freelancer_name);
+        }
       }
       if (filters?.language) {
-        query = query.eq('language', filters.language);
+        if (Array.isArray(filters.language) && filters.language.length > 0) {
+          query = query.in('language', filters.language);
+        } else if (typeof filters.language === 'string' && filters.language) {
+          query = query.eq('language', filters.language);
+        }
       }
       if (filters?.model) {
-        query = query.eq('model', filters.model);
+        if (Array.isArray(filters.model) && filters.model.length > 0) {
+          query = query.in('model', filters.model);
+        } else if (typeof filters.model === 'string' && filters.model) {
+          query = query.eq('model', filters.model);
+        }
       }
       if (filters?.freelancer_type) {
         query = query.eq('freelancer_type', filters.freelancer_type);
       }
       if (filters?.search) {
-        query = query.or(`task.ilike.%${filters.search}%,model.ilike.%${filters.search}%,language.ilike.%${filters.search}%,freelancer_name.ilike.%${filters.search}%`);
+        query = query.or(`task.ilike.%${filters.search}%,model.ilike.%${filters.search}%,language.ilike.%${filters.search}%,freelancer_name.ilike.%${filters.search}%,freelancer_type.ilike.%${filters.search}%`);
       }
 
       const { data, error } = await query;
@@ -47,7 +59,7 @@ export const useFreelancerTasks = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   const addTask = async (taskData: FreelancerTaskInsert) => {
     try {
@@ -68,6 +80,44 @@ export const useFreelancerTasks = () => {
     }
   };
 
+  const updateTask = async (id: string, updates: Partial<FreelancerTaskInsert>) => {
+    try {
+      const { data, error } = await supabase
+        .from('freelancer_tasks')
+        .update(updates)
+        .eq('id', id)
+        .select()
+        .single();
+
+      if (error) throw error;
+      
+      setTasks(prev => prev.map(task => task.id === id ? data : task));
+      return { success: true, data };
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to update task';
+      setError(errorMessage);
+      return { success: false, error: errorMessage };
+    }
+  };
+
+  const deleteTask = async (id: string) => {
+    try {
+      const { error } = await supabase
+        .from('freelancer_tasks')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+      
+      setTasks(prev => prev.filter(task => task.id !== id));
+      return { success: true };
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to delete task';
+      setError(errorMessage);
+      return { success: false, error: errorMessage };
+    }
+  };
+
   const getUniqueValues = (field: keyof FreelancerTask): string[] => {
     return Array.from(new Set(tasks.map(task => String(task[field])))).filter(Boolean);
   };
@@ -82,6 +132,8 @@ export const useFreelancerTasks = () => {
     error,
     fetchTasks,
     addTask,
+    updateTask,
+    deleteTask,
     getUniqueValues,
   };
 };

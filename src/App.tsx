@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { TaskForm } from './components/TaskForm';
 import { FilterPanel } from './components/FilterPanel';
 import { TaskTable } from './components/TaskTable';
@@ -6,34 +6,35 @@ import { ExpenditureChart } from './components/ExpenditureChart';
 import { InvoiceGenerator } from './components/InvoiceGenerator';
 import { useFreelancerTasks } from './hooks/useFreelancerTasks';
 import { FilterState, ChartData } from './types';
-import { exportToCSV } from './utils/csvExport';
-import { BarChart3, FileText, Database } from 'lucide-react';
+import { exportToExcel } from './utils/excelExport';
+import { BarChart3, FileText, FileSpreadsheet } from 'lucide-react';
 
 const initialFilters: FilterState = {
   dateRange: { start: '', end: '' },
-  freelancer_name: '',
-  language: '',
-  model: '',
+  freelancer_name: [],
+  language: [],
+  model: [],
   freelancer_type: '',
   search: '',
 };
 
 function App() {
-  const [activeTab, setActiveTab] = useState<'form' | 'dashboard'>('form');
+  const [activeTab, setActiveTab] = useState<'form' | 'dashboard' | 'invoice'>('form');
   const [filters, setFilters] = useState<FilterState>(initialFilters);
-  const { tasks, loading, fetchTasks, getUniqueValues } = useFreelancerTasks();
+  const { tasks, loading, fetchTasks, updateTask, deleteTask, getUniqueValues } = useFreelancerTasks();
 
+  // Combined effect for fetching data
   useEffect(() => {
-    if (activeTab === 'dashboard') {
+    if (activeTab === 'dashboard' || activeTab === 'invoice') {
       fetchTasks(filters);
     }
-  }, [activeTab, filters]);
+  }, [activeTab, filters, fetchTasks]);
 
-  const handleExportCSV = () => {
-    exportToCSV(tasks, 'freelancer-tasks');
+  const handleExportExcel = () => {
+    exportToExcel(tasks, 'freelancer-tasks');
   };
 
-  const getLanguageExpenditureData = (): ChartData[] => {
+  const getLanguageExpenditureData = useCallback((): ChartData[] => {
     const languageMap = new Map<string, number>();
     
     tasks.forEach(task => {
@@ -48,9 +49,9 @@ function App() {
       value,
       percentage: total > 0 ? (value / total) * 100 : 0,
     }));
-  };
+  }, [tasks]);
 
-  const getModelExpenditureData = (): ChartData[] => {
+  const getModelExpenditureData = useCallback((): ChartData[] => {
     const modelMap = new Map<string, number>();
     
     tasks.forEach(task => {
@@ -65,11 +66,12 @@ function App() {
       value,
       percentage: total > 0 ? (value / total) * 100 : 0,
     }));
-  };
+  }, [tasks]);
 
   const tabs = [
     { id: 'form', label: 'Add Task', icon: FileText },
     { id: 'dashboard', label: 'Dashboard', icon: BarChart3 },
+    { id: 'invoice', label: 'Invoice', icon: FileSpreadsheet },
   ];
 
   return (
@@ -78,9 +80,14 @@ function App() {
       <header className="bg-white shadow-sm border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
-            <div className="flex items-center gap-3">
-              <Database className="w-8 h-8 text-blue-600" />
-              <h1 className="text-xl font-bold text-gray-900">
+            <div className="flex items-center gap-4">
+              <img 
+                src="/BharatGen Logo.png" 
+                alt="BharatGen - GenAI for Bharat, by Bharat" 
+                className="h-10 w-auto object-contain"
+              />
+              <div className="border-l border-gray-300 h-8"></div>
+              <h1 className="text-xl font-semibold text-gray-900">
                 Freelancer Task Management
               </h1>
             </div>
@@ -91,10 +98,10 @@ function App() {
                 return (
                   <button
                     key={tab.id}
-                    onClick={() => setActiveTab(tab.id as 'form' | 'dashboard')}
+                    onClick={() => setActiveTab(tab.id as 'form' | 'dashboard' | 'invoice')}
                     className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-colors ${
                       activeTab === tab.id
-                        ? 'bg-blue-100 text-blue-700'
+                        ? 'bg-orange-100 text-orange-700'
                         : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
                     }`}
                   >
@@ -112,19 +119,24 @@ function App() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {activeTab === 'form' ? (
           <TaskForm />
-        ) : (
+        ) : activeTab === 'dashboard' ? (
           <div className="space-y-6">
+            {/* Filter Panel - Always visible */}
             <FilterPanel filters={filters} onFiltersChange={setFilters} />
             
-            {loading ? (
-              <div className="flex items-center justify-center h-64">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-              </div>
-            ) : (
-              <>
-                <TaskTable tasks={tasks} onExportCSV={handleExportCSV} />
-                
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Charts Section */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {loading ? (
+                <>
+                  <div className="bg-white rounded-xl shadow-lg border border-gray-100 p-6 h-96 flex items-center justify-center">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500"></div>
+                  </div>
+                  <div className="bg-white rounded-xl shadow-lg border border-gray-100 p-6 h-96 flex items-center justify-center">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500"></div>
+                  </div>
+                </>
+              ) : (
+                <>
                   <ExpenditureChart
                     data={getLanguageExpenditureData()}
                     title="Language-wise Expenditure"
@@ -135,13 +147,36 @@ function App() {
                     title="Model-wise Expenditure"
                     type="pie"
                   />
-                </div>
-                
-                <InvoiceGenerator
-                  tasks={tasks}
-                  freelancers={getUniqueValues('freelancer_name')}
-                />
-              </>
+                </>
+              )}
+            </div>
+            
+            {/* Table Section */}
+            {loading ? (
+              <div className="bg-white rounded-lg shadow-lg p-6 flex items-center justify-center h-64">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500"></div>
+              </div>
+            ) : (
+              <TaskTable 
+                tasks={tasks} 
+                onExportExcel={handleExportExcel}
+                onUpdateTask={updateTask}
+                onDeleteTask={deleteTask}
+              />
+            )}
+          </div>
+        ) : (
+          // Invoice Tab
+          <div>
+            {loading ? (
+              <div className="flex items-center justify-center h-64">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500"></div>
+              </div>
+            ) : (
+              <InvoiceGenerator
+                tasks={tasks}
+                freelancers={getUniqueValues('freelancer_name')}
+              />
             )}
           </div>
         )}

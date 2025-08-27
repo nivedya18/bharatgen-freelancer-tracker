@@ -56,9 +56,31 @@ export type Database = {
           updated_at?: string;
         };
       };
+      freelancers: {
+        Row: {
+          id: string;
+          name: string;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          name: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          name?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+      };
     };
   };
 };
 
 export type FreelancerTask = Database['public']['Tables']['freelancer_tasks']['Row'];
 export type FreelancerTaskInsert = Database['public']['Tables']['freelancer_tasks']['Insert'];
+export type Freelancer = Database['public']['Tables']['freelancers']['Row'];
+export type FreelancerInsert = Database['public']['Tables']['freelancers']['Insert'];

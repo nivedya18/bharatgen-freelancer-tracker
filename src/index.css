@@ -73,10 +73,6 @@
     box-shadow: 0 0 0 3px rgb(239 68 68 / 0.1);
   }
 
-  .input-success {
-    @apply border-green-500 focus:border-green-500;
-  }
-
   /* Monospace for numbers */
   .input-numeric {
     font-family: 'SF Mono', Monaco, 'Cascadia Code', monospace;
@@ -187,22 +183,12 @@
     @apply text-sm text-red-600 mt-1;
   }
 
-  /* Success indicator */
-  .field-success::after {
-    content: "✓";
-    @apply absolute right-2 top-1/2 -translate-y-1/2 text-green-500 text-xs font-bold;
-  }
 }
 
 /* Remove scrollbar styling for performance */
 * {
   scrollbar-width: thin;
   scrollbar-color: #cbd5e1 transparent;
-}
-
-/* Keyboard navigation highlights */
-.keyboard-focus {
-  box-shadow: inset 0 0 0 2px rgb(59 130 246);
 }
 
 /* Print styles */
@@ -216,12 +202,3 @@
   }
 }
 
-/* Performance optimizations */
-.will-change-transform {
-  will-change: transform;
-}
-
-.gpu-accelerated {
-  transform: translateZ(0);
-  backface-visibility: hidden;
-}

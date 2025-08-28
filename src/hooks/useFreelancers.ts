@@ -60,15 +60,6 @@ export const useFreelancers = () => {
     }
   };
 
-  const searchFreelancers = (query: string): Freelancer[] => {
-    if (!query) return freelancers;
-    
-    const lowercaseQuery = query.toLowerCase();
-    return freelancers.filter(freelancer => 
-      freelancer.name.toLowerCase().includes(lowercaseQuery)
-    );
-  };
-
   useEffect(() => {
     fetchFreelancers();
   }, []);
@@ -77,8 +68,6 @@ export const useFreelancers = () => {
     freelancers,
     loading,
     error,
-    fetchFreelancers,
     addFreelancer,
-    searchFreelancers,
   };
 };

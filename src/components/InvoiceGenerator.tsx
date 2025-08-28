@@ -4,7 +4,7 @@ import { InvoiceData } from '../types';
 import { Combobox, ComboboxOption } from './Combobox';
 import { FileText, Download, Printer } from 'lucide-react';
 import { format } from 'date-fns';
-import jsPDF from 'jspdf';
+import { InvoicePDFGenerator } from '../utils/invoicePdf';
 
 interface InvoiceGeneratorProps {
   tasks: FreelancerTask[];
@@ -62,79 +62,9 @@ export const InvoiceGenerator: React.FC<InvoiceGeneratorProps> = ({ tasks, freel
 
   const downloadPDF = () => {
     if (!invoiceData) return;
-
-    const pdf = new jsPDF();
-    const pageWidth = pdf.internal.pageSize.width;
-    let yPosition = 20;
-
-    // Header
-    pdf.setFontSize(20);
-    pdf.text('INVOICE', pageWidth / 2, yPosition, { align: 'center' });
-    yPosition += 20;
-
-    // Invoice details
-    pdf.setFontSize(12);
-    pdf.text(`Invoice Date: ${format(new Date(), 'dd/MM/yyyy')}`, 20, yPosition);
-    yPosition += 10;
-    pdf.text(`Period: ${format(new Date(invoiceData.date_range.start), 'dd/MM/yyyy')} - ${format(new Date(invoiceData.date_range.end), 'dd/MM/yyyy')}`, 20, yPosition);
-    yPosition += 20;
-
-    // Freelancer details
-    pdf.setFontSize(14);
-    pdf.text('Bill To:', 20, yPosition);
-    yPosition += 10;
-    pdf.setFontSize(12);
-    pdf.text(invoiceData.freelancer_name, 20, yPosition);
-    yPosition += 20;
-
-    // Table header
-    pdf.setFontSize(10);
-    const headers = ['Task', 'Model', 'Language', 'Days', 'Rate/Day', 'Amount'];
-    const colWidths = [40, 30, 25, 15, 25, 25];
-    let xPosition = 20;
-
-    headers.forEach((header, index) => {
-      pdf.text(header, xPosition, yPosition);
-      xPosition += colWidths[index];
-    });
-    yPosition += 5;
-
-    // Draw line
-    pdf.line(20, yPosition, pageWidth - 20, yPosition);
-    yPosition += 10;
-
-    // Table rows
-    invoiceData.tasks.forEach(task => {
-      if (yPosition > 250) {
-        pdf.addPage();
-        yPosition = 20;
-      }
-
-      xPosition = 20;
-      const rowData = [
-        task.task.substring(0, 20) + (task.task.length > 20 ? '...' : ''),
-        task.model.substring(0, 15) + (task.model.length > 15 ? '...' : ''),
-        task.language.substring(0, 12) + (task.language.length > 12 ? '...' : ''),
-        task.total_time_taken.toString(),
-        `₹${task.pay_rate_per_day.toLocaleString('en-IN')}`,
-        `₹${task.total_payment.toLocaleString('en-IN')}`,
-      ];
-
-      rowData.forEach((data, index) => {
-        pdf.text(data, xPosition, yPosition);
-        xPosition += colWidths[index];
-      });
-      yPosition += 8;
-    });
-
-    // Total
-    yPosition += 10;
-    pdf.line(20, yPosition, pageWidth - 20, yPosition);
-    yPosition += 10;
-    pdf.setFontSize(12);
-    pdf.text(`Total Amount: ₹${invoiceData.total_amount.toLocaleString('en-IN')}`, pageWidth - 80, yPosition, { align: 'right' });
-
-    pdf.save(`invoice-${invoiceData.freelancer_name}-${format(new Date(), 'yyyy-MM-dd')}.pdf`);
+    
+    const pdfGenerator = new InvoicePDFGenerator();
+    pdfGenerator.generate(invoiceData);
   };
 
   const printInvoice = () => {

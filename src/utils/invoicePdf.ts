@@ -37,8 +37,6 @@ export class InvoicePDFGenerator {
   private pageHeight: number;
   private margin: number;
   private currentY: number;
-  private primaryColor: string = '#05539C';
-  private accentColor: string = '#F59222';
   private invoiceNumber: string;
 
   constructor() {
@@ -144,8 +142,7 @@ export class InvoicePDFGenerator {
       `₹${task.total_payment.toLocaleString('en-IN')}`
     ]);
 
-    // Add subtotal row
-    const subtotal = invoiceData.total_amount;
+    // Table data prepared
     
     autoTable(this.pdf, {
       startY: this.currentY,
@@ -180,7 +177,7 @@ export class InvoicePDFGenerator {
         fillColor: [245, 247, 250]
       },
       margin: { left: this.margin, right: this.margin },
-      didDrawPage: (data: any) => {
+      didDrawPage: () => {
         // Add page number at the bottom
         this.pdf.setFontSize(10);
         this.pdf.setTextColor(150);

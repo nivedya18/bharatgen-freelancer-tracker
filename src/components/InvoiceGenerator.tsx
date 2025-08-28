@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { FreelancerTask } from '../lib/supabase';
 import { InvoiceData } from '../types';
+import { Combobox, ComboboxOption } from './Combobox';
 import { FileText, Download, Printer } from 'lucide-react';
 import { format } from 'date-fns';
 import jsPDF from 'jspdf';
@@ -14,6 +15,15 @@ export const InvoiceGenerator: React.FC<InvoiceGeneratorProps> = ({ tasks, freel
   const [selectedFreelancer, setSelectedFreelancer] = useState('');
   const [dateRange, setDateRange] = useState({ start: '', end: '' });
   const [invoiceData, setInvoiceData] = useState<InvoiceData | null>(null);
+
+  // Convert freelancer strings to ComboboxOptions
+  const freelancerOptions: ComboboxOption[] = useMemo(() => 
+    freelancers.map(name => ({ 
+      value: name, 
+      label: name 
+    })),
+    [freelancers]
+  );
 
   const generateInvoice = () => {
     if (!selectedFreelancer || !dateRange.start || !dateRange.end) return;
@@ -144,17 +154,12 @@ export const InvoiceGenerator: React.FC<InvoiceGeneratorProps> = ({ tasks, freel
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Freelancer
           </label>
-          <select
+          <Combobox
+            options={freelancerOptions}
             value={selectedFreelancer}
-            onChange={(e) => setSelectedFreelancer(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:border-transparent"
-            style={{"--tw-ring-color": "rgba(5, 83, 156, 0.5)"} as React.CSSProperties}
-          >
-            <option value="">Select Freelancer</option>
-            {freelancers.map(name => (
-              <option key={name} value={name}>{name}</option>
-            ))}
-          </select>
+            onChange={setSelectedFreelancer}
+            searchPlaceholder="Search freelancer..."
+          />
         </div>
 
         <div>

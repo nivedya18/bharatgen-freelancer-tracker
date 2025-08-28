@@ -44,6 +44,7 @@ export const TaskForm: React.FC = () => {
     watch,
     reset,
     setValue,
+    trigger,
     formState: { errors, isSubmitting, isValid },
   } = useForm<TaskFormData>({
     resolver: zodResolver(taskSchema),
@@ -71,8 +72,10 @@ export const TaskForm: React.FC = () => {
       const start = new Date(startDate);
       const completionDate = addDays(start, Math.ceil(timeTaken) - 1);
       setValue('completion_date', format(completionDate, 'yyyy-MM-dd'));
+      // Trigger revalidation after setting the completion date to fix race condition
+      trigger('completion_date');
     }
-  }, [startDate, timeTaken, setValue]);
+  }, [startDate, timeTaken, setValue, trigger]);
 
   // Handle adding new freelancer
   const handleAddNewFreelancer = useCallback(() => {

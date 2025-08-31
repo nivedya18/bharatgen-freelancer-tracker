@@ -28,7 +28,8 @@ const languages: ComboboxOption[] = [
 const models: ComboboxOption[] = [
   { value: 'Text LLM', label: 'Text LLM' },
   { value: 'TTS', label: 'TTS' },
-  { value: 'ASR', label: 'ASR' }
+  { value: 'ASR', label: 'ASR' },
+  { value: 'Others', label: 'Others' }
 ];
 
 export const TaskForm: React.FC = () => {

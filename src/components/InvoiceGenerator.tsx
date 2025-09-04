@@ -40,7 +40,8 @@ export const InvoiceGenerator: React.FC<InvoiceGeneratorProps> = ({ tasks, freel
     }
 
     const invoiceTasks = filteredTasks.map(task => ({
-      task: task.task,
+      task_group: task.task_group || undefined,
+      task: task.task_description,
       model: task.model,
       language: task.language,
       start_date: task.start_date,

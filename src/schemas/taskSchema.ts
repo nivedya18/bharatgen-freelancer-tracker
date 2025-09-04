@@ -1,7 +1,8 @@
 import { z } from 'zod';
 
 export const taskSchema = z.object({
-  task: z.string().min(1, 'Task is required'),
+  task_group: z.string().optional(),
+  task_description: z.string().min(1, 'Task description is required'),
   model: z.string().min(1, 'Model is required'),
   language: z.string().min(1, 'Language is required'),
   freelancer_name: z.string().min(1, 'Freelancer name is required'),

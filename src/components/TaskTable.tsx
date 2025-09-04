@@ -129,11 +129,11 @@ export const TaskTable: React.FC<TaskTableProps> = ({ tasks, onExportExcel, onUp
               </th>
               <th 
                 className="px-5 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
-                onClick={() => handleSort('task')}
+                onClick={() => handleSort('task_description')}
               >
                 <div className="flex items-center gap-1">
-                  Task
-                  <SortIcon field="task" />
+                  Task Description
+                  <SortIcon field="task_description" />
                 </div>
               </th>
               <th 
@@ -209,8 +209,15 @@ export const TaskTable: React.FC<TaskTableProps> = ({ tasks, onExportExcel, onUp
                 <td className="px-5 py-4 whitespace-nowrap text-sm text-gray-900">
                   {task.freelancer_name}
                 </td>
-                <td className="px-5 py-4 whitespace-nowrap text-sm text-gray-900">
-                  {task.task}
+                <td className="px-5 py-4 text-sm text-gray-900">
+                  <div className="flex items-center gap-2">
+                    {task.task_group && (
+                      <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full whitespace-nowrap">
+                        {task.task_group}
+                      </span>
+                    )}
+                    <span>{task.task_description}</span>
+                  </div>
                 </td>
                 <td className="px-5 py-4 whitespace-nowrap text-sm text-gray-900">
                   {task.model}

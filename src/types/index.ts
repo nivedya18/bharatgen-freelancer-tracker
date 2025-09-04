@@ -1,5 +1,6 @@
 export interface TaskFormData {
-  task: string;
+  task_group?: string;
+  task_description: string;
   model: string;
   language: string;
   freelancer_name: string;
@@ -31,6 +32,7 @@ export interface ChartData {
 export interface InvoiceData {
   freelancer_name: string;
   tasks: Array<{
+    task_group?: string;
     task: string;
     model: string;
     language: string;

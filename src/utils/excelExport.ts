@@ -7,7 +7,8 @@ export const exportToExcel = (
 ) => {
   // Prepare data for Excel
   const excelData = tasks.map(task => ({
-    'Task Description': task.task,
+    'Task Group': task.task_group || '',
+    'Task Description': task.task_description,
     'Model': task.model,
     'Language': task.language,
     'Freelancer Name': task.freelancer_name,
@@ -27,6 +28,7 @@ export const exportToExcel = (
 
   // Set column widths for better readability
   const colWidths = [
+    { wch: 20 }, // Task Group
     { wch: 40 }, // Task Description
     { wch: 12 }, // Model
     { wch: 15 }, // Language

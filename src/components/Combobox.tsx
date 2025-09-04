@@ -15,9 +15,11 @@ interface ComboboxProps {
   searchPlaceholder?: string;
   className?: string;
   error?: boolean;
+  success?: boolean;
   onAddNew?: (value: string) => void;
   addNewLabel?: string;
   minSearchLength?: number;
+  disabled?: boolean;
 }
 
 export const Combobox: React.FC<ComboboxProps> = React.memo(({
@@ -27,9 +29,11 @@ export const Combobox: React.FC<ComboboxProps> = React.memo(({
   searchPlaceholder = 'Type to search...',
   className = '',
   error = false,
+  success = false,
   onAddNew,
   addNewLabel = 'Add new',
-  minSearchLength = 1
+  minSearchLength = 1,
+  disabled = false
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [search, setSearch] = useState('');
@@ -176,12 +180,15 @@ export const Combobox: React.FC<ComboboxProps> = React.memo(({
           value={search}
           onChange={handleInputChange}
           onKeyDown={handleKeyDown}
-          onFocus={() => search.length >= minSearchLength && setIsOpen(true)}
+          onFocus={() => !disabled && search.length >= minSearchLength && setIsOpen(true)}
           placeholder={searchPlaceholder}
+          disabled={disabled}
           className={`
             input-base pr-8
             ${error ? 'input-error' : ''}
+            ${success && value ? 'border-green-500' : ''}
             ${exactMatch ? 'font-medium text-gray-900' : 'text-gray-900'}
+            ${disabled ? 'bg-gray-50 cursor-not-allowed' : ''}
           `}
         />
         <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />

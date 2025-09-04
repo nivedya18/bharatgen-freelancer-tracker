@@ -132,7 +132,7 @@ export class InvoicePDFGenerator {
   private addTasksTable(invoiceData: InvoiceData): void {
     const tableData = invoiceData.tasks.map((task, index) => [
       (index + 1).toString(),
-      task.task,
+      task.task_group ? `[${task.task_group}] ${task.task}` : task.task,
       task.model,
       task.language,
       format(new Date(task.start_date), 'dd/MM/yy'),

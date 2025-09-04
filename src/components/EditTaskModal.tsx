@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState, useCallback } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { taskSchema, TaskFormData } from '../schemas/taskSchema';
-import { FreelancerTask, FreelancerTaskInsert } from '../lib/supabase';
+import { FreelancerTask, FreelancerTaskInsert, FreelancerInsert } from '../lib/supabase';
 import { useFreelancers } from '../hooks/useFreelancers';
 import { FormField } from './FormField';
 import { Combobox, ComboboxOption } from './Combobox';
@@ -37,6 +37,11 @@ const models: ComboboxOption[] = [
   { value: 'Text LLM', label: 'Text LLM' },
   { value: 'TTS', label: 'TTS' },
   { value: 'ASR', label: 'ASR' }
+];
+
+const taskGroups: ComboboxOption[] = [
+  { value: 'Group A', label: 'Group A' },
+  { value: 'Group B', label: 'Group B' }
 ];
 
 export const EditTaskModal: React.FC<EditTaskModalProps> = ({ 
@@ -75,7 +80,8 @@ export const EditTaskModal: React.FC<EditTaskModalProps> = ({
   useEffect(() => {
     if (task && isOpen) {
       reset({
-        task: task.task,
+        task_group: task.task_group || '',
+        task_description: task.task_description,
         model: task.model,
         language: task.language,
         freelancer_name: task.freelancer_name,
@@ -119,10 +125,19 @@ export const EditTaskModal: React.FC<EditTaskModalProps> = ({
     setShowAddFreelancerModal(true);
   }, []);
 
-  const handleFreelancerAdded = useCallback(async (name: string) => {
-    const result = await addFreelancer(name);
+  const handleFreelancerAdded = useCallback(async (freelancer: Partial<FreelancerInsert>) => {
+    const result = await addFreelancer(freelancer);
     if (result.success && result.data) {
       setValue('freelancer_name', result.data.name);
+      // If the freelancer has a type, set it in the form too
+      if (result.data.freelancer_type) {
+        setValue('freelancer_type', result.data.freelancer_type);
+      }
+      // If the freelancer has languages, set the first one in the form
+      const langs = Array.isArray(result.data.language) ? result.data.language : [];
+      if (langs.length > 0) {
+        setValue('language', langs[0]);
+      }
       setShowAddFreelancerModal(false);
     }
     return result;
@@ -188,48 +203,33 @@ export const EditTaskModal: React.FC<EditTaskModalProps> = ({
 
             {/* Form */}
             <form onSubmit={handleSubmit(onSubmit)} className="p-6 space-y-6">
-              {/* Task Field */}
+              {/* Task Group Field */}
               <FormField
-                label="Task"
-                error={errors.task?.message}
+                label="Task Group"
+                error={errors.task_group?.message}
+                icon={<FileText className="w-5 h-5" />}
+              >
+                <Combobox
+                  options={taskGroups}
+                  value={watch('task_group') || ''}
+                  onChange={(value) => setValue('task_group', value)}
+                  placeholder="Select or type group"
+                />
+              </FormField>
+
+              {/* Task Description Field */}
+              <FormField
+                label="Task Description"
+                error={errors.task_description?.message}
                 icon={<FileText className="w-5 h-5" />}
               >
                 <input
                   type="text"
-                  {...register('task')}
+                  {...register('task_description')}
                   className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors"
                   placeholder="Enter task description"
                 />
               </FormField>
-
-              {/* Model and Language */}
-              <div className="grid grid-cols-2 gap-4">
-                <FormField
-                  label="Model"
-                  error={errors.model?.message}
-                  icon={<Cpu className="w-5 h-5" />}
-                >
-                  <Combobox
-                    options={models}
-                    value={watch('model')}
-                    onChange={(value) => setValue('model', value)}
-                    placeholder="Select model"
-                  />
-                </FormField>
-
-                <FormField
-                  label="Language"
-                  error={errors.language?.message}
-                  icon={<Globe className="w-5 h-5" />}
-                >
-                  <Combobox
-                    options={languages}
-                    value={watch('language')}
-                    onChange={(value) => setValue('language', value)}
-                    placeholder="Select language"
-                  />
-                </FormField>
-              </div>
 
               {/* Freelancer and Type */}
               <div className="grid grid-cols-2 gap-4">
@@ -260,6 +260,35 @@ export const EditTaskModal: React.FC<EditTaskModalProps> = ({
                     <option value="Linguist">Linguist</option>
                     <option value="Language Expert">Language Expert</option>
                   </select>
+                </FormField>
+              </div>
+
+              {/* Model and Language */}
+              <div className="grid grid-cols-2 gap-4">
+                <FormField
+                  label="Model"
+                  error={errors.model?.message}
+                  icon={<Cpu className="w-5 h-5" />}
+                >
+                  <Combobox
+                    options={models}
+                    value={watch('model')}
+                    onChange={(value) => setValue('model', value)}
+                    placeholder="Select model"
+                  />
+                </FormField>
+
+                <FormField
+                  label="Language"
+                  error={errors.language?.message}
+                  icon={<Globe className="w-5 h-5" />}
+                >
+                  <Combobox
+                    options={languages}
+                    value={watch('language')}
+                    onChange={(value) => setValue('language', value)}
+                    placeholder="Select language"
+                  />
                 </FormField>
               </div>
 

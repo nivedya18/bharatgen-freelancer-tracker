@@ -11,7 +11,7 @@ export const useFreelancerTasks = () => {
     try {
       setLoading(true);
       let query = supabase
-        .from('freelancer_tasks')
+        .from('master')
         .select('*')
         .order('created_at', { ascending: false });
 
@@ -47,7 +47,7 @@ export const useFreelancerTasks = () => {
         query = query.eq('freelancer_type', filters.freelancer_type);
       }
       if (filters?.search) {
-        query = query.or(`task.ilike.%${filters.search}%,model.ilike.%${filters.search}%,language.ilike.%${filters.search}%,freelancer_name.ilike.%${filters.search}%,freelancer_type.ilike.%${filters.search}%`);
+        query = query.or(`task_description.ilike.%${filters.search}%,task_group.ilike.%${filters.search}%,model.ilike.%${filters.search}%,language.ilike.%${filters.search}%,freelancer_name.ilike.%${filters.search}%,freelancer_type.ilike.%${filters.search}%`);
       }
 
       const { data, error } = await query;
@@ -64,7 +64,7 @@ export const useFreelancerTasks = () => {
   const addTask = async (taskData: FreelancerTaskInsert) => {
     try {
       const { data, error } = await supabase
-        .from('freelancer_tasks')
+        .from('master')
         .insert([taskData])
         .select()
         .single();
@@ -83,7 +83,7 @@ export const useFreelancerTasks = () => {
   const updateTask = async (id: string, updates: Partial<FreelancerTaskInsert>) => {
     try {
       const { data, error } = await supabase
-        .from('freelancer_tasks')
+        .from('master')
         .update(updates)
         .eq('id', id)
         .select()
@@ -103,7 +103,7 @@ export const useFreelancerTasks = () => {
   const deleteTask = async (id: string) => {
     try {
       const { error } = await supabase
-        .from('freelancer_tasks')
+        .from('master')
         .delete()
         .eq('id', id);
 

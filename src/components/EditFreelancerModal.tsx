@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { X, UserPlus, Globe, User } from 'lucide-react';
+import { X, Save, Globe, User } from 'lucide-react';
 import { FormField } from './FormField';
 import { MultiSelectCombobox, MultiSelectOption } from './MultiSelectCombobox';
-import { FreelancerInsert } from '../lib/supabase';
+import { Freelancer, FreelancerUpdate } from '../lib/supabase';
 
 const languages: MultiSelectOption[] = [
   'Assamese', 'Bengali', 'English', 'Gujarati', 'Hindi', 'Kannada',
@@ -10,16 +10,18 @@ const languages: MultiSelectOption[] = [
   'Sanskrit', 'Sindhi', 'Tamil', 'Telugu'
 ].map(lang => ({ value: lang, label: lang }));
 
-interface AddFreelancerModalProps {
+interface EditFreelancerModalProps {
+  freelancer: Freelancer | null;
   isOpen: boolean;
   onClose: () => void;
-  onAdd: (freelancer: Partial<FreelancerInsert>) => Promise<{ success: boolean; error?: string; data?: any }>;
+  onUpdate: (id: string, updates: Partial<FreelancerUpdate>) => Promise<{ success: boolean; error?: string }>;
 }
 
-export const AddFreelancerModal: React.FC<AddFreelancerModalProps> = ({ 
+export const EditFreelancerModal: React.FC<EditFreelancerModalProps> = ({ 
+  freelancer,
   isOpen, 
   onClose, 
-  onAdd 
+  onUpdate 
 }) => {
   const [name, setName] = useState('');
   const [freelancerType, setFreelancerType] = useState<'Linguist' | 'Language Expert' | ''>('');
@@ -27,6 +29,18 @@ export const AddFreelancerModal: React.FC<AddFreelancerModalProps> = ({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
+
+  // Update form when freelancer changes
+  useEffect(() => {
+    if (freelancer && isOpen) {
+      setName(freelancer.name);
+      setFreelancerType(freelancer.freelancer_type || '');
+      // Handle both array and non-array formats
+      const langs = Array.isArray(freelancer.language) ? freelancer.language : [];
+      setSelectedLanguages(langs);
+      setError('');
+    }
+  }, [freelancer, isOpen]);
 
   // Auto-focus input when modal opens
   useEffect(() => {
@@ -46,7 +60,7 @@ export const AddFreelancerModal: React.FC<AddFreelancerModalProps> = ({
     return () => document.removeEventListener('keydown', handleEsc);
   }, [isOpen]);
 
-  if (!isOpen) return null;
+  if (!isOpen || !freelancer) return null;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -69,21 +83,18 @@ export const AddFreelancerModal: React.FC<AddFreelancerModalProps> = ({
     setLoading(true);
     setError('');
 
-    const freelancerData: Partial<FreelancerInsert> = {
+    const updates: Partial<FreelancerUpdate> = {
       name: name.trim(),
       freelancer_type: freelancerType,
       language: selectedLanguages
     };
 
-    const result = await onAdd(freelancerData);
+    const result = await onUpdate(freelancer.id, updates);
     
     if (result.success) {
-      setName('');
-      setFreelancerType('');
-      setSelectedLanguages([]);
       onClose();
     } else {
-      setError(result.error || 'Failed to add freelancer');
+      setError(result.error || 'Failed to update freelancer');
     }
     
     setLoading(false);
@@ -100,7 +111,7 @@ export const AddFreelancerModal: React.FC<AddFreelancerModalProps> = ({
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto">
       <div className="flex min-h-screen items-center justify-center p-4">
-        {/* Backdrop - no animation */}
+        {/* Backdrop */}
         <div 
           className="fixed inset-0 bg-black bg-opacity-30"
           onClick={handleClose}
@@ -110,8 +121,8 @@ export const AddFreelancerModal: React.FC<AddFreelancerModalProps> = ({
         <div className="relative bg-white rounded-lg shadow-2xl max-w-md w-full p-5">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-base font-semibold text-gray-900 flex items-center gap-2">
-              <UserPlus className="w-4 h-4" style={{color: '#F59222'}} />
-              Add New Freelancer
+              <User className="w-4 h-4" style={{color: '#F59222'}} />
+              Edit Freelancer
             </h3>
             <button
               type="button"
@@ -128,7 +139,7 @@ export const AddFreelancerModal: React.FC<AddFreelancerModalProps> = ({
               label="Freelancer Name" 
               required 
               error={error}
-              icon={<UserPlus className="w-3 h-3" />}
+              icon={<User className="w-3 h-3" />}
             >
               <input
                 ref={inputRef}
@@ -136,7 +147,7 @@ export const AddFreelancerModal: React.FC<AddFreelancerModalProps> = ({
                 value={name}
                 onChange={(e) => {
                   setName(e.target.value);
-                  setError(''); // Clear error on type
+                  setError('');
                 }}
                 className="input-base"
                 placeholder="Enter freelancer name"
@@ -152,7 +163,7 @@ export const AddFreelancerModal: React.FC<AddFreelancerModalProps> = ({
                 value={freelancerType}
                 onChange={(e) => {
                   setFreelancerType(e.target.value as 'Linguist' | 'Language Expert' | '');
-                  setError(''); // Clear error on change
+                  setError('');
                 }}
                 className={`input-base ${freelancerType ? 'text-gray-900' : 'text-gray-500'}`}
               >
@@ -172,7 +183,7 @@ export const AddFreelancerModal: React.FC<AddFreelancerModalProps> = ({
                 values={selectedLanguages}
                 onChange={(values) => {
                   setSelectedLanguages(values);
-                  setError(''); // Clear error on change
+                  setError('');
                 }}
                 placeholder="Select languages"
                 searchPlaceholder="Type to search languages..."
@@ -191,11 +202,12 @@ export const AddFreelancerModal: React.FC<AddFreelancerModalProps> = ({
                 type="submit"
                 disabled={loading || !name.trim() || !freelancerType || selectedLanguages.length === 0}
                 className={`
-                  btn-base btn-primary
-                  ${loading || !name.trim() ? 'opacity-50 cursor-not-allowed' : ''}
+                  btn-base btn-primary flex items-center gap-2
+                  ${loading || !name.trim() || !freelancerType || selectedLanguages.length === 0 ? 'opacity-50 cursor-not-allowed' : ''}
                 `}
               >
-                {loading ? 'Adding...' : 'Add Freelancer'}
+                <Save className="w-4 h-4" />
+                {loading ? 'Updating...' : 'Update Freelancer'}
               </button>
             </div>
           </form>

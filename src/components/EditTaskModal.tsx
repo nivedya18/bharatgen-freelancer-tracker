@@ -158,6 +158,7 @@ export const EditTaskModal: React.FC<EditTaskModalProps> = ({
     try {
       const result = await onUpdate(task.id, {
         ...data,
+        freelancer_type: data.freelancer_type as 'Linguist' | 'Language Expert',
         completion_date: data.completion_date || task.completion_date
       });
       

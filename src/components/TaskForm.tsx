@@ -101,12 +101,6 @@ export const TaskForm: React.FC = () => {
     return languages;
   }, [selectedFreelancer]);
 
-  // Check if language field should be read-only (when freelancer has only 1 language)
-  const isLanguageReadOnly = useMemo(() => {
-    return selectedFreelancer?.language && 
-           Array.isArray(selectedFreelancer.language) && 
-           selectedFreelancer.language.length === 1;
-  }, [selectedFreelancer]);
 
   // Get the appropriate rate from rate card
   const rateFromCard = useMemo(() => {
@@ -144,7 +138,7 @@ export const TaskForm: React.FC = () => {
       }
     } else if (!freelancerName) {
       // Clear freelancer type and language when freelancer name is cleared
-      setValue('freelancer_type', '');
+      setValue('freelancer_type', '' as any);
       setValue('language', '');
     }
   }, [selectedFreelancer, freelancerName, setValue, trigger]);
@@ -202,10 +196,14 @@ export const TaskForm: React.FC = () => {
       data.completion_date = format(completionDate, 'yyyy-MM-dd');
     }
     
-    const result = await addTask({
+    // Ensure freelancer_type is valid
+    const submitData = {
       ...data,
+      freelancer_type: data.freelancer_type as 'Linguist' | 'Language Expert',
       completion_date: data.completion_date || format(new Date(), 'yyyy-MM-dd')
-    });
+    };
+    
+    const result = await addTask(submitData);
     
     if (result.success) {
       setShowSuccess(true);

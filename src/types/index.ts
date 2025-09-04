@@ -4,7 +4,7 @@ export interface TaskFormData {
   model: string;
   language: string;
   freelancer_name: string;
-  freelancer_type: 'Linguist' | 'Language Expert';
+  freelancer_type: 'Linguist' | 'Language Expert' | '';
   pay_rate_per_day: number;
   total_time_taken: number;
   start_date: string;

@@ -15,6 +15,7 @@ const initialFilters: FilterState = {
   language: [],
   model: [],
   freelancer_type: '',
+  task_status: '',
   search: '',
 };
 

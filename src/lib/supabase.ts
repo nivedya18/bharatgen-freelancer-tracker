@@ -26,6 +26,7 @@ export type Database = {
           total_time_taken: number;
           start_date: string;
           completion_date: string;
+          task_status: 'Planned' | 'Ongoing' | 'Completed';
           created_at: string;
           updated_at: string;
         };
@@ -42,6 +43,7 @@ export type Database = {
           total_time_taken: number;
           start_date: string;
           completion_date: string;
+          task_status?: 'Planned' | 'Ongoing' | 'Completed';
           created_at?: string;
           updated_at?: string;
         };
@@ -58,6 +60,7 @@ export type Database = {
           total_time_taken?: number;
           start_date?: string;
           completion_date?: string;
+          task_status?: 'Planned' | 'Ongoing' | 'Completed';
           created_at?: string;
           updated_at?: string;
         };

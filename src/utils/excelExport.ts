@@ -13,6 +13,7 @@ export const exportToExcel = (
     'Language': task.language,
     'Freelancer Name': task.freelancer_name,
     'Freelancer Type': task.freelancer_type,
+    'Task Status': task.task_status || 'Planned',
     'Pay Rate (₹/day)': task.pay_rate_per_day,
     'Total Days': task.total_time_taken,
     'Total Payment (₹)': task.pay_rate_per_day * task.total_time_taken,
@@ -34,6 +35,7 @@ export const exportToExcel = (
     { wch: 15 }, // Language
     { wch: 20 }, // Freelancer Name
     { wch: 15 }, // Freelancer Type
+    { wch: 12 }, // Task Status
     { wch: 15 }, // Pay Rate
     { wch: 12 }, // Total Days
     { wch: 15 }, // Total Payment

@@ -9,6 +9,7 @@ export interface TaskFormData {
   total_time_taken: number;
   start_date: string;
   completion_date: string;
+  task_status?: 'Planned' | 'Ongoing' | 'Completed';
 }
 
 export interface FilterState {
@@ -20,6 +21,7 @@ export interface FilterState {
   language: string | string[];
   model: string | string[];
   freelancer_type: string;
+  task_status: string;
   search: string;
 }
 

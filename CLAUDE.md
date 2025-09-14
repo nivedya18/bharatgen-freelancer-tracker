@@ -199,6 +199,8 @@ npm run build
 npm run preview
 ```
 
+**Development Server**: Runs on `http://localhost:3000/` when started with `npm run dev`
+
 ## Environment Configuration
 
 Required environment variables in `.env.local`:

@@ -190,7 +190,16 @@ export const TaskTable: React.FC<TaskTableProps> = ({ tasks, onExportExcel, onUp
                   <SortIcon field="start_date" />
                 </div>
               </th>
-              <th 
+              <th
+                className="px-5 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                onClick={() => handleSort('task_status')}
+              >
+                <div className="flex items-center gap-1">
+                  Status
+                  <SortIcon field="task_status" />
+                </div>
+              </th>
+              <th
                 className="px-5 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
                 onClick={() => handleSort('total_payment')}
               >
@@ -242,6 +251,27 @@ export const TaskTable: React.FC<TaskTableProps> = ({ tasks, onExportExcel, onUp
                 </td>
                 <td className="px-5 py-4 whitespace-nowrap text-sm text-gray-900">
                   {formatDate(task.start_date)} - {formatDate(task.completion_date)}
+                </td>
+                <td className="px-5 py-4 whitespace-nowrap text-sm text-gray-900">
+                  <select
+                    value={task.task_status || 'Planned'}
+                    onChange={async (e) => {
+                      if (onUpdateTask) {
+                        await onUpdateTask(task.id, { task_status: e.target.value as 'Planned' | 'Ongoing' | 'Completed' });
+                      }
+                    }}
+                    className={`px-2 py-1 text-xs font-semibold rounded-full border-none outline-none cursor-pointer ${
+                      (task.task_status || 'Planned') === 'Planned'
+                        ? 'bg-blue-100 text-blue-800'
+                        : (task.task_status || 'Planned') === 'Ongoing'
+                        ? 'bg-orange-100 text-orange-800'
+                        : 'bg-green-100 text-green-800'
+                    }`}
+                  >
+                    <option value="Planned">Planned</option>
+                    <option value="Ongoing">Ongoing</option>
+                    <option value="Completed">Completed</option>
+                  </select>
                 </td>
                 <td className="px-5 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                   {formatCurrency(task.pay_rate_per_day * task.total_time_taken)}

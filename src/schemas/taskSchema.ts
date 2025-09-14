@@ -13,6 +13,7 @@ export const taskSchema = z.object({
   total_time_taken: z.number().min(0.01, 'Time taken must be greater than 0'),
   start_date: z.string().min(1, 'Start date is required'),
   completion_date: z.string().optional(),
+  task_status: z.enum(['Planned', 'Ongoing', 'Completed']).optional().default('Planned'),
 }).refine((data) => {
   // Completion date will be auto-calculated if both start_date and total_time_taken are present
   // Only validate if completion_date is actually provided

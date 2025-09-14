@@ -36,6 +36,7 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ filters, onFiltersChan
       language: [],
       model: [],
       freelancer_type: '',
+      task_status: '',
       search: '',
     });
   };
@@ -76,7 +77,7 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ filters, onFiltersChan
         </button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
         {/* Search */}
         <div className="md:col-span-2">
           <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -181,6 +182,25 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ filters, onFiltersChan
             <option value="">All Types</option>
             <option value="Linguist">Linguist</option>
             <option value="Language Expert">Language Expert</option>
+          </select>
+        </div>
+
+        {/* Task Status */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Status
+          </label>
+          <select
+            value={filters.task_status}
+            onChange={(e) => handleFilterChange('task_status', e.target.value)}
+            className={`w-full px-3.5 py-2.5 text-base border border-gray-300 rounded-md focus:outline-none focus:ring-1 min-h-[42px] ${!filters.task_status ? 'text-gray-500' : ''}`}
+            onFocus={(e) => {e.target.style.borderColor = '#05539C'; e.target.style.boxShadow = '0 0 0 3px rgba(5, 83, 156, 0.15)';}}
+            onBlur={(e) => {e.target.style.borderColor = ''; e.target.style.boxShadow = '';}}
+          >
+            <option value="">All Status</option>
+            <option value="Planned">Planned</option>
+            <option value="Ongoing">Ongoing</option>
+            <option value="Completed">Completed</option>
           </select>
         </div>
       </div>

@@ -46,8 +46,11 @@ export const useFreelancerTasks = () => {
       if (filters?.freelancer_type) {
         query = query.eq('freelancer_type', filters.freelancer_type);
       }
+      if (filters?.task_status) {
+        query = query.eq('task_status', filters.task_status);
+      }
       if (filters?.search) {
-        query = query.or(`task_description.ilike.%${filters.search}%,task_group.ilike.%${filters.search}%,model.ilike.%${filters.search}%,language.ilike.%${filters.search}%,freelancer_name.ilike.%${filters.search}%,freelancer_type.ilike.%${filters.search}%`);
+        query = query.or(`task_description.ilike.%${filters.search}%,task_group.ilike.%${filters.search}%,model.ilike.%${filters.search}%,language.ilike.%${filters.search}%,freelancer_name.ilike.%${filters.search}%,freelancer_type.ilike.%${filters.search}%,task_status.ilike.%${filters.search}%`);
       }
 
       const { data, error } = await query;

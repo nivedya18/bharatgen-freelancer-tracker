@@ -21,8 +21,7 @@ import {
   Cpu,
   Check,
   CreditCard,
-  Users,
-  CheckSquare
+  Users
 } from 'lucide-react';
 import { addDays, format } from 'date-fns';
 
@@ -474,8 +473,8 @@ export const TaskForm: React.FC = () => {
           </FormField>
         </div>
 
-        {/* Row 5: Start Date, Completion Date, Task Status */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {/* Row 5: Start Date, Completion Date */}
+        <div className="form-grid">
           <FormField
             label="Start Date"
             required
@@ -501,21 +500,6 @@ export const TaskForm: React.FC = () => {
               readOnly
               className={`input-base bg-gray-50 ${watch('completion_date') ? 'text-gray-900 border-green-500' : 'text-gray-500'}`}
             />
-          </FormField>
-
-          <FormField
-            label="Task Status"
-            error={errors.task_status?.message}
-            icon={<CheckSquare className="w-3 h-3" />}
-          >
-            <select
-              {...register('task_status')}
-              className={`input-base ${watch('task_status') ? 'text-gray-900 border-green-500' : 'text-gray-500'}`}
-            >
-              <option value="Planned">Planned</option>
-              <option value="Ongoing">Ongoing</option>
-              <option value="Completed">Completed</option>
-            </select>
           </FormField>
         </div>
 

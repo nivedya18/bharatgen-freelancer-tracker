@@ -7,7 +7,7 @@ import { useFreelancers } from '../hooks/useFreelancers';
 import { FormField } from './FormField';
 import { Combobox, ComboboxOption } from './Combobox';
 import { AddFreelancerModal } from './AddFreelancerModal';
-import { 
+import {
   X,
   FileText,
   Globe,
@@ -16,8 +16,7 @@ import {
   IndianRupee,
   Clock,
   Cpu,
-  Save,
-  CheckSquare
+  Save
 } from 'lucide-react';
 import { addDays, format } from 'date-fns';
 
@@ -90,8 +89,7 @@ export const EditTaskModal: React.FC<EditTaskModalProps> = ({
         pay_rate_per_day: task.pay_rate_per_day,
         total_time_taken: task.total_time_taken,
         start_date: task.start_date,
-        completion_date: task.completion_date,
-        task_status: task.task_status || 'Planned'
+        completion_date: task.completion_date
       });
     }
   }, [task, isOpen, reset]);
@@ -326,8 +324,8 @@ export const EditTaskModal: React.FC<EditTaskModalProps> = ({
                 </FormField>
               </div>
 
-              {/* Dates and Status */}
-              <div className="grid grid-cols-3 gap-4">
+              {/* Dates */}
+              <div className="grid grid-cols-2 gap-4">
                 <FormField
                   label="Start Date"
                   error={errors.start_date?.message}
@@ -351,21 +349,6 @@ export const EditTaskModal: React.FC<EditTaskModalProps> = ({
                     className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors"
                     readOnly
                   />
-                </FormField>
-
-                <FormField
-                  label="Task Status"
-                  error={errors.task_status?.message}
-                  icon={<CheckSquare className="w-5 h-5" />}
-                >
-                  <select
-                    {...register('task_status')}
-                    className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors"
-                  >
-                    <option value="Planned">Planned</option>
-                    <option value="Ongoing">Ongoing</option>
-                    <option value="Completed">Completed</option>
-                  </select>
                 </FormField>
               </div>
 
